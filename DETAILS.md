@@ -88,7 +88,3 @@ Shop: [CM_MIPI_IMX586_RPI](https://www.camemake.eu/shop/cm-mipi-imx586-rpi-imx58
 - Stream on is `0x0100=0x01` after the table settles. Standby is `0x0100=0x00`
 - The table's analog gain `0x0000` is 1× and the picture is a few codes above black. After the table the driver writes `0x0204=0x03` and `0x0205=0xe0` (32×, `1024 / (1024 - 992)`) and the same pair to `0x0216` / `0x0217`. It also writes `0x0601=0` so a color-bar test cannot stay on.
 - The browser preview of this mode is about 2 frames per second.
-
-## Older Camemake repositories
-
-[IMX586_RPI5_MIPI_DRIVER](https://github.com/Camemake/IMX586_RPI5_MIPI_DRIVER) and [OX05B1S_RPI5_MIPI_DRIVER](https://github.com/Camemake/OX05B1S_RPI5_MIPI_DRIVER) are older pages. They describe a different clock, a different I2C address, or a different pixel format from the modules tested here. Use this repository.
