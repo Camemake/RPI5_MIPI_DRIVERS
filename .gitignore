@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.o
+*.ko
+*.ko.xz
+*.mod
+*.mod.c
+*.dtbo
+*.cmd
+*.order
+*.symvers
+*.d
+livecap
+Module.symvers
+modules.order
+.module-common.o

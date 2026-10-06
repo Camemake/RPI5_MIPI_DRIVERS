@@ -1,0 +1,7 @@
+The kernel drivers, device-tree overlays, and the small preview programs in this
+repository are released under the GNU General Public License, version 2 only,
+the same license as the Linux kernel.
+
+SPDX-License-Identifier: GPL-2.0-only
+
+The full license text is at https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
