@@ -1,6 +1,8 @@
-# IMX675 on Raspberry Pi 5
+# Sony IMX675 on Raspberry Pi 5
 
-This folder is the driver for the Camemake [IMX675 5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-imx675-rpi-imx675-5mp-ff-for-raspberry-pi-1105).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the [Sony IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html). Sony's product brief is [IMX675-AAQR](https://www.sony-semicon.com/files/62/flyer_security/IMX675-AAQR_AAQR1_AATN_Flyer.pdf). The module is the [IMX675 5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-imx675-rpi-imx675-5mp-ff-for-raspberry-pi-1105).
+
+The mode that streamed is 2608×1960, RAW10, GRBG, 2 MIPI lanes, 800 MHz link, on CAM/DISP 0. Sony's page describes the security sensor, including higher catalog frame rates. This folder is the mode that streamed on the Pi.
 
 ## Use it
 

@@ -1,6 +1,8 @@
-# SC233HGS on Raspberry Pi 5
+# SmartSens SC233HGS on Raspberry Pi 5
 
-This folder is the driver for the Camemake [SC233HGS 2MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-sc233hgs-rpi-sc233hgs-2mp-ff-for-raspberry-pi-1092).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the [SmartSens SC233HGS](https://www.smartsenstech.com/en/mpage?id=212), a global-shutter sensor. The same part is in SmartSens's [global-shutter list](https://www.smartsenstech.com/en/gs_products). The module is the [SC233HGS 2MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-sc233hgs-rpi-sc233hgs-2mp-ff-for-raspberry-pi-1092).
+
+The mode that streamed is 1920×1200, RAW10, BGGR, 4 MIPI lanes, 270 MHz link, on CAM/DISP 0. SmartSens lists a higher catalog frame rate. This folder is the mode that streamed on the Pi.
 
 ## Use it
 

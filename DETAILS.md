@@ -12,7 +12,21 @@ The boot file needs `camera_auto_detect=0` and exactly one of these overlays. Th
 
 Register address is 16 bits and the value is 8 bits on every sensor in this package.
 
+The sensor page is the maker's own description of the chip. The row below is the mode this package streamed on a Raspberry Pi 5.
+
+| Sensor | Maker's page | Tested mode | Lanes | Link |
+| --- | --- | --- | --- | --- |
+| SmartSens SC450AI | [SC450AI](https://www.smartsenstech.com/en/mpage?id=142) | 2688×1520 RAW10 BGGR | 4 | 180 MHz |
+| OMNIVISION OX05B1S | [OX05B1S](https://www.ovt.com/products/ox05b/) | 2592×1944 RAW10 GRBG | 4 | 450 MHz |
+| GalaxyCore GC4023 | [GalaxyCore](https://www.gcoreinc.com/) | 2560×1440 RAW10 RGGB | 2 | 351 MHz |
+| Himax HM2170 | [HM2170](https://www.himax.com.tw/products/cmos-image-sensor/image-sensors/) | 1928×1088 RAW10 GRBG | 2 | 540 MHz |
+| SmartSens SC233HGS | [SC233HGS](https://www.smartsenstech.com/en/mpage?id=212) | 1920×1200 RAW10 BGGR | 4 | 270 MHz |
+| Sony IMX675 | [IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html) | 2608×1960 RAW10 GRBG | 2 | 800 MHz |
+| Sony IMX586 | [IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/) | 4000×3000 RAW10 RGGB | 4 | 450 MHz |
+
 ## SC450AI
+
+Sensor: [SmartSens SC450AI](https://www.smartsenstech.com/en/mpage?id=142)
 
 Shop: [CM_MIPI_SC450AI_RPI](https://www.camemake.eu/shop/cm-mipi-sc450ai-rpi-sc450ai-4mp-ff-for-raspberry-pi-1096)
 
@@ -22,6 +36,8 @@ Shop: [CM_MIPI_SC450AI_RPI](https://www.camemake.eu/shop/cm-mipi-sc450ai-rpi-sc4
 - The register list was written for a 27 MHz clock
 
 ## OX05B1S
+
+Sensor: [OMNIVISION OX05B1S](https://www.ovt.com/products/ox05b/)
 
 Shop: [CM_MIPI_OX05B1S_RPI](https://www.camemake.eu/shop/cm-mipi-ox05b1s-rpi-ox05b1s-5mp-ff-for-raspberry-pi-1088)
 
@@ -34,6 +50,8 @@ Shop: [CM_MIPI_OX05B1S_RPI](https://www.camemake.eu/shop/cm-mipi-ox05b1s-rpi-ox0
 
 ## GC4023
 
+Sensor: [GalaxyCore](https://www.gcoreinc.com/). The public GalaxyCore site is the company page.
+
 Shop: [CM_MIPI_GC4023_RPI](https://www.camemake.eu/shop/cm-mipi-gc4023-rpi-gc4023-2-5mp-ff-for-raspberry-pi-1095)
 
 - Compatible `galaxycore,gc4023`, I2C `0x29`. The chip does not answer at `0x31`. Chip id at `0x03f0` is `0x4023`
@@ -42,6 +60,8 @@ Shop: [CM_MIPI_GC4023_RPI](https://www.camemake.eu/shop/cm-mipi-gc4023-rpi-gc402
 - Stream on is `0x0100=0x09`. Standby is `0x0100=0x00`
 
 ## HM2170
+
+Sensor: [Himax HM2170](https://www.himax.com.tw/products/cmos-image-sensor/image-sensors/)
 
 Shop: [CM_MIPI_HM2170_RPI](https://www.camemake.eu/shop/cm-mipi-hm2170-rpi-hm2170-2mp-ff-for-raspberry-pi-1082)
 
@@ -54,6 +74,8 @@ Shop: [CM_MIPI_HM2170_RPI](https://www.camemake.eu/shop/cm-mipi-hm2170-rpi-hm217
 
 ## SC233HGS
 
+Sensor: [SmartSens SC233HGS](https://www.smartsenstech.com/en/mpage?id=212). The same part is in SmartSens's [global-shutter list](https://www.smartsenstech.com/en/gs_products).
+
 Shop: [CM_MIPI_SC233HGS_RPI](https://www.camemake.eu/shop/cm-mipi-sc233hgs-rpi-sc233hgs-2mp-ff-for-raspberry-pi-1092)
 
 - Compatible `smartsens,sc233hgs`, I2C `0x30`, chip id at `0x3107` is `0xcb61`
@@ -63,6 +85,8 @@ Shop: [CM_MIPI_SC233HGS_RPI](https://www.camemake.eu/shop/cm-mipi-sc233hgs-rpi-s
 - The table's exposure is very short. After the table the driver writes a longer exposure (`0x3e01=0xc0`) and gain (`0x3e09=0x80`).
 
 ## IMX675
+
+Sensor: [Sony IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html). Sony's product brief is [IMX675-AAQR](https://www.sony-semicon.com/files/62/flyer_security/IMX675-AAQR_AAQR1_AATN_Flyer.pdf).
 
 Shop: [CM_MIPI_IMX675_RPI](https://www.camemake.eu/shop/cm-mipi-imx675-rpi-imx675-5mp-ff-for-raspberry-pi-1105)
 
@@ -75,6 +99,8 @@ Shop: [CM_MIPI_IMX675_RPI](https://www.camemake.eu/shop/cm-mipi-imx675-rpi-imx67
 - Standby is `0x3000=0x01` and master stop is `0x3002=0x01`. After the table settles, stream on is `0x3000=0` and then `0x3002=0`
 
 ## IMX586
+
+Sensor: [Sony IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/). Sony describes the 8000×6000 array. This package streams the 4000×3000 binned mode.
 
 Shop: [CM_MIPI_IMX586_RPI](https://www.camemake.eu/shop/cm-mipi-imx586-rpi-imx586-48mp-ff-for-raspberry-pi-1104)
 

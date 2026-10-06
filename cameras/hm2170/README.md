@@ -1,6 +1,8 @@
-# HM2170 on Raspberry Pi 5
+# Himax HM2170 on Raspberry Pi 5
 
-This folder is the driver for the Camemake [HM2170 2MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-hm2170-rpi-hm2170-2mp-ff-for-raspberry-pi-1082).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the [Himax HM2170](https://www.himax.com.tw/products/cmos-image-sensor/image-sensors/). The module is the [HM2170 2MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-hm2170-rpi-hm2170-2mp-ff-for-raspberry-pi-1082).
+
+The mode that streamed is 1928×1088, RAW10, GRBG, 2 MIPI lanes, 540 MHz link, on CAM/DISP 0. The tested module is revision D. Himax lists the HM2170 as a 1920×1080 sensor. This folder uses the 1928×1088 readout that streamed.
 
 ## Use it
 

@@ -1,6 +1,8 @@
-# SC450AI on Raspberry Pi 5
+# SmartSens SC450AI on Raspberry Pi 5
 
-This folder is the driver for the Camemake [SC450AI 4MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-sc450ai-rpi-sc450ai-4mp-ff-for-raspberry-pi-1096).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the [SmartSens SC450AI](https://www.smartsenstech.com/en/mpage?id=142). The module is the [SC450AI 4MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-sc450ai-rpi-sc450ai-4mp-ff-for-raspberry-pi-1096).
+
+The mode that streamed is 2688×1520, RAW10, BGGR, 4 MIPI lanes, 180 MHz link, on CAM/DISP 0. SmartSens's page describes the sensor. This folder is the tested Raspberry Pi mode.
 
 ## Use it
 

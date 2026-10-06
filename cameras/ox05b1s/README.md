@@ -1,6 +1,8 @@
-# OX05B1S on Raspberry Pi 5
+# OMNIVISION OX05B1S on Raspberry Pi 5
 
-This folder is the driver for the Camemake [OX05B1S 5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-ox05b1s-rpi-ox05b1s-5mp-ff-for-raspberry-pi-1088).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the [OMNIVISION OX05B1S](https://www.ovt.com/products/ox05b/), a 5-megapixel RGB-IR global-shutter sensor. The module is the [OX05B1S 5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-ox05b1s-rpi-ox05b1s-5mp-ff-for-raspberry-pi-1088).
+
+The mode that streamed is 2592×1944, RAW10, GRBG, 4 MIPI lanes, 450 MHz link, on CAM/DISP 0. OMNIVISION's page lists a higher catalog frame rate. This folder is the rate that streamed on the Pi.
 
 ## Use it
 

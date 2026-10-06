@@ -1,6 +1,8 @@
-# GC4023 on Raspberry Pi 5
+# GalaxyCore GC4023 on Raspberry Pi 5
 
-This folder is the driver for the Camemake [GC4023 2.5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-gc4023-rpi-gc4023-2-5mp-ff-for-raspberry-pi-1095).
+This folder is the Raspberry Pi 5 driver for the Camemake module that uses the GalaxyCore GC4023. GalaxyCore's public site is [gcoreinc.com](https://www.gcoreinc.com/). The module is the [GC4023 2.5MP FF for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-gc4023-rpi-gc4023-2-5mp-ff-for-raspberry-pi-1095).
+
+The mode that streamed is 2560×1440, RAW10, RGGB, 2 MIPI lanes, 351 MHz link, on CAM/DISP 0. The chip answers at I2C 0x29.
 
 ## Use it
 
