@@ -25,6 +25,7 @@ The sensor page is the maker's own description of the chip. The row below is the
 | Sony IMX586 | [IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/) | 4000×3000 RAW10 RGGB | 4 | 450 MHz |
 | OMNIVISION OV9281 | [OV9281](https://www.ovt.com/products/ov9281/) | 1280×800 mono RAW10 | 2 | 450 MHz |
 | onsemi AR0234CS | [AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs) | 1920×1200 RAW10 GRBG | 2 | 506.25 MHz |
+| Sony IMX908 | Contact Camemake | 3856×2176 RAW10 RGGB | 2 | 720 MHz |
 
 ## SC450AI
 
@@ -145,3 +146,16 @@ Shop: [CM_MIPI_AR0234CS_RPI](https://www.camemake.eu/shop/cm-mipi-ar0234cs-rpi-a
 - Soft reset is `0x301a=0x0001`, then 200 ms, then standby `0x301a=0x2058`. Stream on is `0x301a=0x205c`. Writing only `0x301c=0x01` did not start the stream
 - Frame length `0x300a=0x04c4` is 1220 lines. Line length `0x300c=0x0264` is 612. Exposure `0x3012=0x02dc` is 732 lines. Analog gain `0x3060=0x0e` is just above 1×
 - The browser preview is the full 1920×1200 frame, about 3 pictures a second
+
+## IMX908
+
+Sensor: Sony IMX908. Contact Camemake for the module.
+
+- Compatible `sony,imx908`, I2C `0x1a`. Chip id at `0x4c0c` is `0x038c`, little-endian. That register answers after standby is cancelled and about 24 ms have passed
+- 3856×2176, RAW10, RGGB, fourcc `pRAA`
+- The receiver pads each line from 4820 bytes to 4832. `sizeimage` is 10514432
+- 2 lanes. The driver writes `0x3040=0x01`. On this connector, 4-lane mode (`0x3040=0x03`) fails CRC and the packets arrive as data type `0x37`
+- The clock is the crystal on the module. `0x3014=0x03` selects 27 MHz. Do not drive a clock into that pin
+- Link 720 MHz, from `0x3015=0x03`. Log line `1440 Mbps`. Sony's RAW10 value `0x359c=0x2c` is written with the mode
+- Stream on is standby cancel `0x3000=0x00`, a 24 ms wait, then master start `0x3002=0x00`. Standby is `0x3000=0x01` and master stop is `0x3002=0x01`
+- Analog gain `0x3070=80` is 24 dB. A 1 second capture held 21 frames. The browser preview is half of 3856×2176, about 3 pictures a second
