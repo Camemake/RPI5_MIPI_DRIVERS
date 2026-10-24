@@ -5,9 +5,7 @@ This file is everything this driver names or writes. A row with no note is a mod
 ## What the driver records
 
 Sony IMX908 CSI-2 sensor driver for Raspberry Pi 5.
-The register list is the one that streamed on the Luckfox Aura.
-It comes from Sony's kernel driver (Lachlan Michael, 28 Aug 2026),
-not a captured mode dump. The clock is the module crystal.
+The clock is the module crystal.
 0x3014=0x03 is that 27 MHz input. 0x3040=0x01 is 2 lanes: 4-lane
 mode on this connector fails CRC and the packets arrive as data
 type 0x37. 0x3015=0x03 is the 720 MHz link. Chip id 0x038c is
