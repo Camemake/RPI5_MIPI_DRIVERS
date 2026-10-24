@@ -25,3 +25,5 @@ A picture with a strong magenta cast. This sensor sees infrared as well as color
 I2C address 0x36, chip id 0x580542, 2592×1944, 4 lanes, GRBG. The link is 450 MHz. Each line is padded to 3248 bytes.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

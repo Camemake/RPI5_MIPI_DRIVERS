@@ -25,3 +25,5 @@ A normal color picture, updating at about 2 frames per second. The preview is sl
 I2C 0x1a, chip id 0x0586, 4 lanes, RGGB, link 450 MHz. The driver raises analog gain to 32× after the register list, because the list's own gain of 1× is almost black.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

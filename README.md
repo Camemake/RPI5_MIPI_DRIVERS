@@ -1,6 +1,6 @@
 # Raspberry Pi 5 MIPI camera drivers
 
-Camemake publishes these open-source MIPI CSI-2 drivers for its Raspberry Pi camera modules. Each driver was tested on a Raspberry Pi 5, on the socket printed CAM/DISP 0, and produced a picture. The sensors are the SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, OMNIVISION OV9281, onsemi AR0234CS, and Sony IMX908.
+Camemake publishes these open-source MIPI CSI-2 drivers for its Raspberry Pi camera modules. Each driver was tested on a Raspberry Pi 5, on the socket printed CAM/DISP 0, and produced a picture. The sensors are the SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, OMNIVISION OV9281, onsemi AR0234CS, Sony IMX908, and OmniVision OV5640.
 
 The Raspberry Pi camera app does not list these modules. The picture is a browser page on port 8090. Raw V4L2 is the path that works: a Linux kernel module, a device-tree overlay, and the preview in this repository.
 
@@ -77,6 +77,7 @@ The sensor link goes to the company that makes the chip. That page describes the
 | [OV9281](cameras/ov9281/README.md) | [OMNIVISION OV9281](https://www.ovt.com/products/ov9281/) | [1MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-ov9281-rpi-ov9281-1mp-ff-for-raspberry-pi-1107) | `bash install.sh ov9281` |
 | [AR0234CS](cameras/ar0234cs/README.md) | [onsemi AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs) | [2MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-ar0234cs-rpi-ar0234cs-2mp-ff-for-raspberry-pi-1106) | `bash install.sh ar0234cs` |
 | [IMX908](cameras/imx908/README.md) | Sony IMX908 | Contact Camemake | `bash install.sh imx908` |
+| [OV5640](cameras/ov5640/README.md) | OmniVision OV5640 | Contact Camemake | `bash install.sh ov5640` |
 
 All of the Raspberry Pi modules are listed at [Raspberry Pi MIPI camera modules](https://www.camemake.eu/raspberry-pi-camera-modules-rpi). Chip id, lanes, link frequency, and the packed format are in [DETAILS.md](DETAILS.md).
 
@@ -88,6 +89,8 @@ The AR0234CS preview is color, at the full 1920×1200. onsemi lists 120 frames p
 
 The IMX908 preview is color, at half of 3856×2176. The clock is the crystal on the module. The tested link is 720 MHz, on 2 lanes. Contact Camemake for this module.
 
+The OV5640 preview is color, 640×480, at about 30 frames per second. This module's crystal is 24 MHz, not 27 MHz. Connector pin 6 is the power-down pin and it is GPIO 34. That pin has to stay low. Driving it high, which is what the Pi's camera-power GPIO does, makes the chip ignore I2C. The driver in this repository holds the pin low. Contact Camemake for this module.
+
 The IMX586 browser page updates at about 2 pictures a second. Each frame is about 15 MB, and the viewer draws every one. The driver is using the 4000×3000 binned mode, which is the mode that was tested. Sony describes an 8000×6000 array on the sensor page. That mode is not in this package.
 
 ## If the page stays black
@@ -95,7 +98,7 @@ The IMX586 browser page updates at about 2 pictures a second. Each frame is abou
 Run this and read the last lines that mention your camera:
 
 ```bash
-dmesg | grep -i -E "sc450ai|ox05b1s|gc4023|hm2170|sc233hgs|imx675|imx586|ov9281|ar0234cs|imx908"
+dmesg | grep -i -E "sc450ai|ox05b1s|gc4023|hm2170|sc233hgs|imx675|imx586|ov9281|ar0234cs|imx908|ov5640"
 ```
 
 - A line with the chip id means the Pi sees the module. Run `bash view.sh` with the same name.
@@ -108,7 +111,7 @@ A new driver starts at the next reboot. Do not unload the camera driver while a 
 
 ### Which Raspberry Pi 5 cameras are in this repository?
 
-Ten Camemake MIPI modules: SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, OMNIVISION OV9281, onsemi AR0234CS, and Sony IMX908. Install the one that matches the module, with `bash install.sh` and the name from the table.
+Eleven Camemake MIPI modules: SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, OMNIVISION OV9281, onsemi AR0234CS, Sony IMX908, and OmniVision OV5640. Install the one that matches the module, with `bash install.sh` and the name from the table.
 
 ### Where do these drivers plug in?
 
@@ -134,6 +137,10 @@ Yes. `bash install.sh ar0234cs` installs the tested color mode: 1920×1200, RAW1
 
 Yes. `bash install.sh imx908` installs the tested mode: 3856×2176, RAW10, RGGB, 2 MIPI lanes, 720 MHz link, on CAM/DISP 0. The clock is the crystal on the module. A 1 second capture held 21 frames. The preview is half of that picture. Contact Camemake for the module.
 
+### Is there a Raspberry Pi 5 driver for the OmniVision OV5640?
+
+Yes. `bash install.sh ov5640` installs the tested mode: 640×480, UYVY, 2 MIPI lanes, 192 MHz link, on CAM/DISP 0. The crystal on the module is 24 MHz. The chip answers at I2C `0x3c`, and the id at `0x300a` is `0x5640`. Connector pin 6 is power-down and it is GPIO 34. That pin is active high. The same GPIO is the Pi's camera-power enable, and driving it high holds this sensor off, so the driver keeps the pin low. A probe error `-121` means the pin was high or the flex was not seated.
+
 ### Is there a Raspberry Pi 5 driver for the OMNIVISION OV9281?
 
 Yes. `bash install.sh ov9281` installs the tested mode: 1280×800, mono RAW10, 2 MIPI lanes, 450 MHz link, on CAM/DISP 0. The picture is gray. OMNIVISION describes the sensor at [OV9281](https://www.ovt.com/products/ov9281/). The Pi kernel also has an `ov9282` driver for this chip, and that driver wants a 24 MHz clock. This package uses the module's 27 MHz crystal and keeps the in-kernel driver from binding.
@@ -157,7 +164,8 @@ Camemake publishes this repository and sells the modules. Engineering is in Berl
 | `install.sh` | Builds the driver, installs it, and sets the boot file |
 | `view.sh` | Starts the browser preview |
 | `cameras/<name>/<name>.c` | The kernel driver |
-| `cameras/<name>/regs.inc` | The register list the driver writes |
+| `cameras/<name>/regs.inc` | The register list the driver writes, when the list is a separate file |
+| `cameras/<name>/REGISTERS.md` | Every register the driver names or writes |
 | `cameras/<name>/<name>-overlay.dts` | The Pi 5 device-tree overlay for CAM/DISP 0 |
 | `cameras/<name>/live.py` | The preview page |
 | `DETAILS.md` | Chip id, lanes, link frequency, and the other numbers |

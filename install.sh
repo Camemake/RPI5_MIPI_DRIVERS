@@ -76,7 +76,7 @@ sensor = os.environ["SENSOR"]
 path = Path(os.environ["CFG"])
 names = {
     "sc450ai", "ox05b1s", "gc4023", "hm2170",
-    "sc233hgs", "imx675", "imx586", "ov9281", "ar0234cs", "imx908",
+    "sc233hgs", "imx675", "imx586", "ov9281", "ar0234cs", "imx908", "ov5640",
 }
 kept = []
 for line in path.read_text(encoding="utf-8", errors="replace").splitlines():

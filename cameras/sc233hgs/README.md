@@ -25,3 +25,5 @@ A normal color picture. The driver asks the sensor for each frame, because this 
 I2C 0x30, chip id 0xcb61, 1920×1200, 4 lanes, BGGR, link 270 MHz.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

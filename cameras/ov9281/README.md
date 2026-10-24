@@ -25,3 +25,5 @@ A gray picture. This sensor has no color filters. The preview keeps the bright p
 I2C address 0x60, chip id 0x9281, 1280×800, 2 lanes, mono RAW10, link 450 MHz. The packed format is `Y10P`, and each line is 1600 bytes.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

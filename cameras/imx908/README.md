@@ -25,3 +25,5 @@ A color picture. The preview samples each 2×2 block down to one pixel, so the t
 I2C address 0x1a, chip id 0x038c, 3856×2176, 2 lanes, RGGB RAW10, link 720 MHz. The packed format is `pRAA`. The receiver pads each line from 4820 bytes to 4832, so `sizeimage` is 10514432. The clock is the module crystal. Do not drive a clock into that pin.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

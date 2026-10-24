@@ -25,3 +25,5 @@ A normal color picture of the scene in front of the lens.
 The register list matches this module's 27 MHz crystal. The mode is 2688×1520, 4 lanes, BGGR.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

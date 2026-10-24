@@ -25,3 +25,5 @@ A normal color picture.
 I2C address 0x25. The tested module is revision D. The mode is 1928×1088, 2 lanes, GRBG, link 540 MHz.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

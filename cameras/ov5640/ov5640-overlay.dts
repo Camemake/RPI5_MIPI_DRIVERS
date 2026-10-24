@@ -1,0 +1,101 @@
+/dts-v1/;
+/plugin/;
+
+/*
+ * OmniVision OV5640 on Raspberry Pi 5 CAM/DISP 0.
+ * I2C 0x3c. Chip id 0x5640 at 0x300a. 2 lanes. The crystal on
+ * the module is 24 MHz (3N24.000F33YCG) and feeds MCLK.
+ * Connector pin 6 is PWDN and lands on GPIO 34 (CAM_IO0). PWDN is
+ * active high with an internal pull-up, so that pin has to stay
+ * low or the chip never ACKs. The 3.3 V pin is the supply. cam0_reg
+ * is the same GPIO, so it stays disabled. RESETB is pulled up on
+ * the module and is not on the connector. The stored profile is a
+ * 12 MHz DVP list and is not this table.
+ */
+
+/ {
+	compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&i2c0if>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c0mux>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@2 {
+		target = <&cam0_clk>;
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <24000000>;
+		};
+	};
+
+	fragment@3 {
+		target = <&i2c_csi_dsi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			cam_node: ov5640@3c {
+				compatible = "ovti,ov5640";
+				reg = <0x3c>;
+				status = "okay";
+
+				clocks = <&cam0_clk>;
+				clock-names = "xclk";
+
+				AVDD-supply = <&cam_dummy_reg>;
+				DOVDD-supply = <&cam_dummy_reg>;
+				DVDD-supply = <&cam_dummy_reg>;
+				powerdown-gpios = <&rp1_gpio 34 0>;
+
+				rotation = <0>;
+				orientation = <2>;
+
+				port {
+					cam_endpoint: endpoint {
+						bus-type = <4>;
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+						clock-noncontinuous;
+						link-frequencies = /bits/ 64 <192000000>;
+						remote-endpoint = <&csi_ep>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@4 {
+		target = <&csi0>;
+		__overlay__ {
+			status = "okay";
+
+			port {
+				csi_ep: endpoint {
+					bus-type = <4>;
+					remote-endpoint = <&cam_endpoint>;
+					clock-lanes = <0>;
+					data-lanes = <1 2>;
+					clock-noncontinuous;
+				};
+			};
+		};
+	};
+
+	fragment@5 {
+		target = <&cam0_reg>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+};

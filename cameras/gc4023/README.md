@@ -25,3 +25,5 @@ A normal color picture.
 This module answers at I2C 0x29, not 0x31. It is a 2-lane camera. The mode is 2560×1440, RGGB, link 351 MHz.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

@@ -25,3 +25,5 @@ A color picture at 1920×1200. The preview fills in the missing color at each pi
 I2C address 0x10, chip id 0x0a56, 1920×1200, 2 lanes, GRBG RAW10, link 506.25 MHz. The packed format is `pgAA`, and each line is 2400 bytes. Register values are 16 bits. The mono AR0234 answers with chip id 0x1a56, and this driver does not use that part.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

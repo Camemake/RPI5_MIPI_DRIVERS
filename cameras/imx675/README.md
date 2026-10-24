@@ -25,3 +25,5 @@ A normal color picture.
 I2C 0x1a, module id 0x96, 2608×1960, 2 lanes, GRBG, link 800 MHz.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
+
+Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).

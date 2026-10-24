@@ -1,6 +1,6 @@
 # Technical details
 
-These numbers are from a Raspberry Pi 5, CAM/DISP 0, with the module's own 27 MHz crystal. The Pi kernel has no built-in driver for these sensors. The OV9281 is the exception: the kernel's `ov9282` driver matches it and wants a 24 MHz clock, so this package keeps that driver from binding and uses the 27 MHz driver here. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
+These numbers are from a Raspberry Pi 5, CAM/DISP 0. The module crystal is 27 MHz, except the OV5640, whose crystal is 24 MHz. The Pi kernel has no built-in driver for these sensors. The OV9281 is the exception: the kernel's `ov9282` driver matches it and wants a 24 MHz clock, so this package keeps that driver from binding and uses the 27 MHz driver here. The OV5640 driver is the mainline sensor driver, built out of tree, with the power-down pin held low. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
 
 The receiver is `rp1-cfe`. A fresh receiver comes up at 640×480. The preview sets the sensor pad, `csi2:0`, and `csi2:4` to the mode below, including `field:none colorspace:raw`, then enables the link `csi2:4 -> rp1-cfe-csi2_ch0`. The capture node is `rp1-cfe-csi2_ch0`. The media device number changes after a reboot. `view.sh` finds it.
 
@@ -8,7 +8,7 @@ The link number below is the V4L2 link frequency programmed into the receiver. T
 
 Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, and the receiver rejects it. Mono RAW10 is `Y10P`.
 
-The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at 27 MHz, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`.
+The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at the module crystal rate, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`. The OV5640 overlay does not use `cam0_reg`: that GPIO is the sensor's power-down pin and has to stay low.
 
 Register address is 16 bits. The value is 8 bits, except on the AR0234CS, where the value is 16 bits.
 
@@ -26,6 +26,7 @@ The sensor page is the maker's own description of the chip. The row below is the
 | OMNIVISION OV9281 | [OV9281](https://www.ovt.com/products/ov9281/) | 1280×800 mono RAW10 | 2 | 450 MHz |
 | onsemi AR0234CS | [AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs) | 1920×1200 RAW10 GRBG | 2 | 506.25 MHz |
 | Sony IMX908 | Contact Camemake | 3856×2176 RAW10 RGGB | 2 | 720 MHz |
+| OmniVision OV5640 | Contact Camemake | 640×480 UYVY | 2 | 192 MHz |
 
 ## SC450AI
 
@@ -159,3 +160,15 @@ Sensor: Sony IMX908. Contact Camemake for the module.
 - Link 720 MHz, from `0x3015=0x03`. Log line `1440 Mbps`. Sony's RAW10 value `0x359c=0x2c` is written with the mode
 - Stream on is standby cancel `0x3000=0x00`, a 24 ms wait, then master start `0x3002=0x00`. Standby is `0x3000=0x01` and master stop is `0x3002=0x01`
 - Analog gain `0x3070=80` is 24 dB. A 1 second capture held 21 frames. The browser preview is half of 3856×2176, about 3 pictures a second
+
+## OV5640
+
+Sensor: OmniVision OV5640. Contact Camemake for the module.
+
+- Compatible `ovti,ov5640`, I2C `0x3c`, chip id at `0x300a` is `0x5640`. A note that says write `0x40` and read `0x42` is 7-bit `0x20`. This module does not answer there
+- 640×480, UYVY, fourcc `UYVY`, 1280 bytes per line, `sizeimage` 614400
+- 2 lanes, non-continuous clock. Link 192 MHz, log line `384 Mbps`. The driver's 384 MHz menu entry is the rate before this mode is applied
+- The crystal on the module is 24 MHz and it feeds MCLK. `cam0_clk` is 24000000. Do not drive GPIO 34 as a clock
+- Connector pin 6 is PWDN and it is GPIO 34. PWDN is active high. The internal pull-up holds the chip down, and every address NACKs while the pin is high. `cam0_reg` is that same GPIO, so the overlay disables it and holds the pin low. RESETB is pulled up on the module and is not on the connector. GPIO 35 is open
+- The register lists in the driver are the mainline mode tables. The stored 12 MHz DVP list is not this mode. Every write is in `cameras/ov5640/REGISTERS.md`
+- The browser preview is the full 640×480 frame, about 30 pictures a second
