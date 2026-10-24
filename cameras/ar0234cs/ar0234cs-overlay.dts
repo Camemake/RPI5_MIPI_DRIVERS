@@ -1,0 +1,86 @@
+/dts-v1/;
+/plugin/;
+
+/*
+ * Color onsemi AR0234CS on Raspberry Pi 5 CAM/DISP 0.
+ * 1920x1200 GRBG RAW10, 2 lanes. The 10-bit PLL table was published
+ * for a 24 MHz clock and a 450 MHz link. This module's crystal is
+ * 27 MHz, so the same ratios run at 506.25 MHz. 0x31ae=0x0202 is
+ * 2 lanes.
+ */
+
+/ {
+	compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&i2c0if>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c0mux>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@2 {
+		target = <&cam0_clk>;
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <27000000>;
+		};
+	};
+
+	fragment@3 {
+		target = <&i2c_csi_dsi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			cam_node: ar0234cs@10 {
+				compatible = "onnn,ar0234cs";
+				reg = <0x10>;
+				status = "okay";
+
+				clocks = <&cam0_clk>;
+				clock-names = "xclk";
+
+				avdd-supply = <&cam0_reg>;
+				dovdd-supply = <&cam_dummy_reg>;
+				dvdd-supply = <&cam_dummy_reg>;
+
+				rotation = <0>;
+				orientation = <2>;
+
+				port {
+					cam_endpoint: endpoint {
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+						link-frequencies =
+							/bits/ 64 <506250000>;
+						remote-endpoint = <&csi_ep>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@4 {
+		target = <&csi0>;
+		__overlay__ {
+			status = "okay";
+
+			port {
+				csi_ep: endpoint {
+					remote-endpoint = <&cam_endpoint>;
+					clock-lanes = <0>;
+					data-lanes = <1 2>;
+				};
+			};
+		};
+	};
+};

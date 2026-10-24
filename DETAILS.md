@@ -10,7 +10,7 @@ Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, 
 
 The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at 27 MHz, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`.
 
-Register address is 16 bits and the value is 8 bits on every sensor in this package.
+Register address is 16 bits. The value is 8 bits, except on the AR0234CS, where the value is 16 bits.
 
 The sensor page is the maker's own description of the chip. The row below is the mode this package streamed on a Raspberry Pi 5.
 
@@ -24,6 +24,7 @@ The sensor page is the maker's own description of the chip. The row below is the
 | Sony IMX675 | [IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html) | 2608×1960 RAW10 GRBG | 2 | 800 MHz |
 | Sony IMX586 | [IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/) | 4000×3000 RAW10 RGGB | 4 | 450 MHz |
 | OMNIVISION OV9281 | [OV9281](https://www.ovt.com/products/ov9281/) | 1280×800 mono RAW10 | 2 | 450 MHz |
+| onsemi AR0234CS | [AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs) | 1920×1200 RAW10 GRBG | 2 | 506.25 MHz |
 
 ## SC450AI
 
@@ -129,3 +130,18 @@ Shop: [CM_MIPI_OV9281_RPI](https://www.camemake.eu/shop/cm-mipi-ov9281-rpi-ov928
 - The Pi kernel's `ov9282` driver wants 24 MHz. `install.sh` stops that module from loading, and this overlay replaces the Pi's OV9281 overlay. That Pi overlay targets the other camera socket
 - Stream on is `0x0100=0x01` after the table settles. Standby is `0x0100=0x00`. Soft reset is `0x0103=0x01`, with a 10 ms wait before the rest of the table
 - A 3 second capture held 354 frames. The preview is gray
+
+## AR0234CS
+
+Sensor: [onsemi AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs). onsemi lists 1920×1200 at 120 fps. This package streams that size on the module's 27 MHz crystal. A 3 second capture held 160 frames.
+
+Shop: [CM_MIPI_AR0234CS_RPI](https://www.camemake.eu/shop/cm-mipi-ar0234cs-rpi-ar0234cs-2mp-ff-for-raspberry-pi-1106)
+
+- Compatible `onnn,ar0234cs`, I2C `0x10`, chip id at `0x3000` is `0x0a56`. The mono part reads `0x1a56` and this driver rejects it
+- Registers are 16-bit address and 16-bit value
+- 1920×1200, RAW10, GRBG, fourcc `pgAA`, 2400 bytes per line, `sizeimage` 2880000
+- 2 lanes. The table writes `0x31ae=0x0202`. Link 506.25 MHz, log line `1012 Mbps`
+- The 10-bit PLL list was written for a 24 MHz clock: pre-divider `0x302e=0x08`, multiplier `0x3030=0x96`, VCO 450 MHz. The module crystal is 27 MHz, so the same ratios run at 506.25 MHz (`450 * 27 / 24`). Leave the pre-divider at 8. Holding the link at 450 MHz by writing pre-divider 9 produced no frames
+- Soft reset is `0x301a=0x0001`, then 200 ms, then standby `0x301a=0x2058`. Stream on is `0x301a=0x205c`. Writing only `0x301c=0x01` did not start the stream
+- Frame length `0x300a=0x04c4` is 1220 lines. Line length `0x300c=0x0264` is 612. Exposure `0x3012=0x02dc` is 732 lines. Analog gain `0x3060=0x0e` is just above 1×
+- The browser preview is the full 1920×1200 frame, about 3 pictures a second
