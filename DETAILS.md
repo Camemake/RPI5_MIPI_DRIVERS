@@ -1,12 +1,12 @@
 # Technical details
 
-These numbers are from a Raspberry Pi 5, CAM/DISP 0, with the module's own 27 MHz crystal. The Pi kernel has no built-in driver for these sensors. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
+These numbers are from a Raspberry Pi 5, CAM/DISP 0, with the module's own 27 MHz crystal. The Pi kernel has no built-in driver for these sensors. The OV9281 is the exception: the kernel's `ov9282` driver matches it and wants a 24 MHz clock, so this package keeps that driver from binding and uses the 27 MHz driver here. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
 
 The receiver is `rp1-cfe`. A fresh receiver comes up at 640×480. The preview sets the sensor pad, `csi2:0`, and `csi2:4` to the mode below, including `field:none colorspace:raw`, then enables the link `csi2:4 -> rp1-cfe-csi2_ch0`. The capture node is `rp1-cfe-csi2_ch0`. The media device number changes after a reboot. `view.sh` finds it.
 
 The link number below is the V4L2 link frequency programmed into the receiver. The line in `dmesg` that says `Using a link rate of N Mbps` is twice that frequency. It is the rate we asked for.
 
-Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, and the receiver rejects it.
+Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, and the receiver rejects it. Mono RAW10 is `Y10P`.
 
 The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at 27 MHz, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`.
 
@@ -23,6 +23,7 @@ The sensor page is the maker's own description of the chip. The row below is the
 | SmartSens SC233HGS | [SC233HGS](https://www.smartsenstech.com/en/mpage?id=212) | 1920×1200 RAW10 BGGR | 4 | 270 MHz |
 | Sony IMX675 | [IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html) | 2608×1960 RAW10 GRBG | 2 | 800 MHz |
 | Sony IMX586 | [IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/) | 4000×3000 RAW10 RGGB | 4 | 450 MHz |
+| OMNIVISION OV9281 | [OV9281](https://www.ovt.com/products/ov9281/) | 1280×800 mono RAW10 | 2 | 450 MHz |
 
 ## SC450AI
 
@@ -114,3 +115,17 @@ Shop: [CM_MIPI_IMX586_RPI](https://www.camemake.eu/shop/cm-mipi-imx586-rpi-imx58
 - Stream on is `0x0100=0x01` after the table settles. Standby is `0x0100=0x00`
 - The table's analog gain `0x0000` is 1× and the picture is a few codes above black. After the table the driver writes `0x0204=0x03` and `0x0205=0xe0` (32×, `1024 / (1024 - 992)`) and the same pair to `0x0216` / `0x0217`. It also writes `0x0601=0` so a color-bar test cannot stay on.
 - The browser preview of this mode is about 2 frames per second.
+
+## OV9281
+
+Sensor: [OMNIVISION OV9281](https://www.ovt.com/products/ov9281/). OMNIVISION lists 1280×800 at 120 fps on a 24 MHz clock. This package streams that size on the module's 27 MHz crystal.
+
+Shop: [CM_MIPI_OV9281_RPI](https://www.camemake.eu/shop/cm-mipi-ov9281-rpi-ov9281-1mp-ff-for-raspberry-pi-1107)
+
+- Compatible `ovti,ov9281`, I2C `0x60`, chip id at `0x300a` is `0x9281`
+- 1280×800, mono RAW10, fourcc `Y10P`, 1600 bytes per line, `sizeimage` 1280000
+- 2 lanes. `0x3662=0x05` is RAW10. Link 450 MHz, log line `900 Mbps`
+- The register list was written for a 24 MHz clock and 800 Mbps per lane, which is a 400 MHz link. The module crystal is 27 MHz, so the same PLL ratios run at 450 MHz (`400 * 27 / 24`)
+- The Pi kernel's `ov9282` driver wants 24 MHz. `install.sh` stops that module from loading, and this overlay replaces the Pi's OV9281 overlay. That Pi overlay targets the other camera socket
+- Stream on is `0x0100=0x01` after the table settles. Standby is `0x0100=0x00`. Soft reset is `0x0103=0x01`, with a 10 ms wait before the rest of the table
+- A 3 second capture held 354 frames. The preview is gray

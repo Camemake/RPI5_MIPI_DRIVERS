@@ -51,6 +51,13 @@ gcc -O2 -o "$CAM/livecap" "$CAM/livecap.c"
 sudo make -C "/lib/modules/$(uname -r)/build" M="$CAM" modules_install
 sudo depmod -a
 
+if [ "$SENSOR" = "ov9281" ]; then
+  sudo tee /etc/modprobe.d/ov9281-camemake.conf >/dev/null << 'EOF'
+blacklist ov9282
+install ov9282 /bin/false
+EOF
+fi
+
 if [ -d /boot/firmware/overlays ]; then
   CFG=/boot/firmware/config.txt
   OVERLAYS=/boot/firmware/overlays
@@ -69,7 +76,7 @@ sensor = os.environ["SENSOR"]
 path = Path(os.environ["CFG"])
 names = {
     "sc450ai", "ox05b1s", "gc4023", "hm2170",
-    "sc233hgs", "imx675", "imx586",
+    "sc233hgs", "imx675", "imx586", "ov9281",
 }
 kept = []
 for line in path.read_text(encoding="utf-8", errors="replace").splitlines():

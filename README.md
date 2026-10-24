@@ -1,6 +1,6 @@
 # Raspberry Pi 5 MIPI camera drivers
 
-Camemake publishes these open-source MIPI CSI-2 drivers for its Raspberry Pi camera modules. Each driver was tested on a Raspberry Pi 5, on the socket printed CAM/DISP 0, and produced a picture. The sensors are the SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, and Sony IMX586.
+Camemake publishes these open-source MIPI CSI-2 drivers for its Raspberry Pi camera modules. Each driver was tested on a Raspberry Pi 5, on the socket printed CAM/DISP 0, and produced a picture. The sensors are the SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, and OMNIVISION OV9281.
 
 The Raspberry Pi camera app does not list these modules. The picture is a browser page on port 8090. Raw V4L2 is the path that works: a Linux kernel module, a device-tree overlay, and the preview in this repository.
 
@@ -74,10 +74,13 @@ The sensor link goes to the company that makes the chip. That page describes the
 | [SC233HGS](cameras/sc233hgs/README.md) | [SmartSens SC233HGS](https://www.smartsenstech.com/en/mpage?id=212) | [2MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-sc233hgs-rpi-sc233hgs-2mp-ff-for-raspberry-pi-1092) | `bash install.sh sc233hgs` |
 | [IMX675](cameras/imx675/README.md) | [Sony IMX675](https://www.sony-semicon.com/en/news/2022/2022072001.html) | [5MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-imx675-rpi-imx675-5mp-ff-for-raspberry-pi-1105) | `bash install.sh imx675` |
 | [IMX586](cameras/imx586/README.md) | [Sony IMX586](https://www.sony.com/en/SonyInfo/News/Press/201807/18-060E/) | [48MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-imx586-rpi-imx586-48mp-ff-for-raspberry-pi-1104) | `bash install.sh imx586` |
+| [OV9281](cameras/ov9281/README.md) | [OMNIVISION OV9281](https://www.ovt.com/products/ov9281/) | [1MP for Raspberry Pi](https://www.camemake.eu/shop/cm-mipi-ov9281-rpi-ov9281-1mp-ff-for-raspberry-pi-1107) | `bash install.sh ov9281` |
 
 All of the Raspberry Pi modules are listed at [Raspberry Pi MIPI camera modules](https://www.camemake.eu/raspberry-pi-camera-modules-rpi). Chip id, lanes, link frequency, and the packed format are in [DETAILS.md](DETAILS.md).
 
 The OX05B1S preview looks magenta. That sensor sees infrared as well as color, and this simple viewer does not separate the infrared. A magenta picture means the camera is streaming.
+
+The OV9281 preview is gray. It is a monochrome global-shutter sensor. OMNIVISION's page lists 120 frames per second at a 24 MHz clock. This module's crystal is 27 MHz, and the tested link is 450 MHz. The Pi's own OV9281 overlay is for the other camera socket and a 24 MHz clock. `install.sh` keeps that in-kernel driver from binding.
 
 The IMX586 browser page updates at about 2 pictures a second. Each frame is about 15 MB, and the viewer draws every one. The driver is using the 4000×3000 binned mode, which is the mode that was tested. Sony describes an 8000×6000 array on the sensor page. That mode is not in this package.
 
@@ -86,7 +89,7 @@ The IMX586 browser page updates at about 2 pictures a second. Each frame is abou
 Run this and read the last lines that mention your camera:
 
 ```bash
-dmesg | grep -i -E "sc450ai|ox05b1s|gc4023|hm2170|sc233hgs|imx675|imx586"
+dmesg | grep -i -E "sc450ai|ox05b1s|gc4023|hm2170|sc233hgs|imx675|imx586|ov9281"
 ```
 
 - A line with the chip id means the Pi sees the module. Run `bash view.sh` with the same name.
@@ -99,7 +102,7 @@ A new driver starts at the next reboot. Do not unload the camera driver while a 
 
 ### Which Raspberry Pi 5 cameras are in this repository?
 
-Seven Camemake MIPI modules: SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, and Sony IMX586. Install the one that matches the module, with `bash install.sh` and the name from the table.
+Eight Camemake MIPI modules: SmartSens SC450AI, OMNIVISION OX05B1S, GalaxyCore GC4023, Himax HM2170, SmartSens SC233HGS, Sony IMX675, Sony IMX586, and OMNIVISION OV9281. Install the one that matches the module, with `bash install.sh` and the name from the table.
 
 ### Where do these drivers plug in?
 
@@ -116,6 +119,10 @@ Yes. `bash install.sh imx586` installs the tested mode: 4000×3000, RAW10, RGGB,
 ### Is there a Raspberry Pi 5 driver for the Sony IMX675?
 
 Yes. `bash install.sh imx675` installs 2608×1960, RAW10, GRBG, 2 lanes, 800 MHz link. Sony Semiconductor Solutions describes the IMX675 on its [security-sensor announcement](https://www.sony-semicon.com/en/news/2022/2022072001.html).
+
+### Is there a Raspberry Pi 5 driver for the OMNIVISION OV9281?
+
+Yes. `bash install.sh ov9281` installs the tested mode: 1280×800, mono RAW10, 2 MIPI lanes, 450 MHz link, on CAM/DISP 0. The picture is gray. OMNIVISION describes the sensor at [OV9281](https://www.ovt.com/products/ov9281/). The Pi kernel also has an `ov9282` driver for this chip, and that driver wants a 24 MHz clock. This package uses the module's 27 MHz crystal and keeps the in-kernel driver from binding.
 
 ### Why is the OMNIVISION OX05B1S picture magenta?
 
