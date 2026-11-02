@@ -1,6 +1,6 @@
 # Technical details
 
-These numbers are from a Raspberry Pi 5, CAM/DISP 0. The module crystal is 27 MHz, except the OV5640, whose crystal is 24 MHz. The Pi kernel has no built-in driver for these sensors. The OV9281 is the exception: the kernel's `ov9282` driver matches it and wants a 24 MHz clock, so this package keeps that driver from binding and uses the 27 MHz driver here. The OV5640 driver is the mainline sensor driver, built out of tree, with the power-down pin held low. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
+These numbers are from a Raspberry Pi 5, CAM/DISP 0. The module crystal is 27 MHz, except the OV5640, the AR1335, and the SC835HAI, whose crystals are 24 MHz. The Pi kernel has no built-in driver for these sensors. The OV9281 is the exception: the kernel's `ov9282` driver matches it and wants a 24 MHz clock, so this package keeps that driver from binding and uses the 27 MHz driver here. The OV5640 driver is the mainline sensor driver, built out of tree, with the power-down pin held low. `rpicam-hello` does not list them. Raw V4L2 is the path that works.
 
 The receiver is `rp1-cfe`. A fresh receiver comes up at 640×480. The preview sets the sensor pad, `csi2:0`, and `csi2:4` to the mode below, including `field:none colorspace:raw`, then enables the link `csi2:4 -> rp1-cfe-csi2_ch0`. The capture node is `rp1-cfe-csi2_ch0`. The media device number changes after a reboot. `view.sh` finds it.
 
@@ -8,9 +8,9 @@ The link number below is the V4L2 link frequency programmed into the receiver. T
 
 Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, and the receiver rejects it. Mono RAW10 is `Y10P`.
 
-The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at the module crystal rate, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`. The OV5640 overlay does not use `cam0_reg`: that GPIO is the sensor's power-down pin and has to stay low.
+The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at the module crystal rate, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`. The OV5640 overlay does not use `cam0_reg`: that GPIO is the sensor's power-down pin and has to stay low. The AR1335 and SC835HAI overlays do not use `cam0_reg` either: that GPIO is the reset and has to stay high. Do not drive GPIO 35 on those two modules. The crystal is the clock.
 
-Register address is 16 bits. The value is 8 bits, except on the AR0234CS, where the value is 16 bits.
+Register address is 16 bits. The value is 8 bits, except on the AR0234CS and the AR1335, where the value is 16 bits.
 
 The sensor page is the maker's own description of the chip. The row below is the mode this package streamed on a Raspberry Pi 5.
 
@@ -27,6 +27,8 @@ The sensor page is the maker's own description of the chip. The row below is the
 | onsemi AR0234CS | [AR0234CS](https://www.onsemi.com/products/sensors/image-sensors/ar0234cs) | 1920×1200 RAW10 GRBG | 2 | 506.25 MHz |
 | Sony IMX908 | Contact Camemake | 3856×2176 RAW10 RGGB | 2 | 720 MHz |
 | OmniVision OV5640 | Contact Camemake | 640×480 UYVY | 2 | 192 MHz |
+| onsemi AR1335 | [AR1335](https://www.onsemi.com/products/sensors/image-sensors/ar1335) | 4208×3120 RAW10 GRBG | 4 | 276 MHz |
+| SmartSens SC835HAI | [SC835HAI](https://www.smartsenstech.com/en/ai_products) | 3840×2160 RAW10 BGGR | 2 | 396 MHz |
 
 ## SC450AI
 
@@ -172,3 +174,32 @@ Sensor: OmniVision OV5640. Contact Camemake for the module.
 - Connector pin 6 is PWDN and it is GPIO 34. PWDN is active high. The internal pull-up holds the chip down, and every address NACKs while the pin is high. `cam0_reg` is that same GPIO, so the overlay disables it and holds the pin low. RESETB is pulled up on the module and is not on the connector. GPIO 35 is open
 - The register lists in the driver are the mainline mode tables. The stored 12 MHz DVP list is not this mode. Every write is in `cameras/ov5640/REGISTERS.md`
 - The browser preview is the full 640×480 frame, about 30 pictures a second
+
+## AR1335
+
+Sensor: [onsemi AR1335](https://www.onsemi.com/products/sensors/image-sensors/ar1335)
+
+Shop: [CM_MIPI_AR1335_RPI](https://www.camemake.eu/shop/cm-mipi-ar1335-rpi-ar1335-13mp-ff-for-raspberry-pi-1098)
+
+- Compatible `onnn,ar1335`, I2C `0x36`, chip id at `0x0000` is `0x0153`
+- Registers are 16-bit address and 16-bit value
+- 4208×3120, RAW10, GRBG, fourcc `pgAA`
+- The receiver pads each line from 5260 bytes to 5264. `sizeimage` is 16423680
+- 4 lanes. The table writes `0x31ae=0x0204`. Link 276 MHz, log line `552 Mbps`
+- The crystal on the module is 24 MHz. `0x0306=0x2e2e` is both PLL multipliers at 46. Do not drive GPIO 35
+- GPIO 34 is XSHUTDOWN, active low. The chip answers only while the pin is high. `cam0_reg` is that same GPIO, so the overlay disables it
+- An address of 0 in the table is a delay in milliseconds. Stream on is `0x301a=0x021c`. Standby is `0x301a=0x0218`. Exposure `0x0202=0x0080` is 128 lines
+- The browser preview is half of 4208×3120, about 2 pictures a second
+
+## SC835HAI
+
+Sensor: [SmartSens SC835HAI](https://www.smartsenstech.com/en/ai_products). Contact Camemake for the module.
+
+- Compatible `smartsens,sc835hai`, I2C `0x30`, chip id at `0x3107` is `0xc170`
+- 3840×2160, RAW10, BGGR, fourcc `pBAA`, 4800 bytes per line, `sizeimage` 10368000
+- 2 lanes. The table writes `0x3018=0x3a` and `0x301f=0x08`. Link 396 MHz, log line `792 Mbps`
+- The crystal on the module is 24 MHz, which is the clock this table was written for. Do not drive GPIO 35
+- GPIO 34 is the reset, active low. The chip answers only while the pin is high. `cam0_reg` is that same GPIO, so the overlay disables it
+- Soft reset is `0x0103=0x01`, then 10 ms. Stream on is `0x0100=0x01` after the table and another 10 ms. Standby is `0x0100=0x00`
+- Line length `0x320c/0x320d` is 4200. Frame length `0x320e/0x320f` is 2250
+- The browser preview is half of 3840×2160, about 3 pictures a second
