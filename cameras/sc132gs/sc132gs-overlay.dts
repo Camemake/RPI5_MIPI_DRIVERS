@@ -1,0 +1,88 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&i2c0if>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c0mux>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@2 {
+		target = <&cam0_clk>;
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <27000000>;
+		};
+	};
+
+	fragment@3 {
+		target = <&i2c_csi_dsi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			cam_node: sc132gs@30 {
+				compatible = "smartsens,sc132gs";
+				reg = <0x30>;
+				status = "okay";
+
+				clocks = <&cam0_clk>;
+				clock-names = "xclk";
+				reset-gpios = <&rp1_gpio 34 1>;
+
+				avdd-supply = <&cam_dummy_reg>;
+				dovdd-supply = <&cam_dummy_reg>;
+				dvdd-supply = <&cam_dummy_reg>;
+
+				rotation = <0>;
+				orientation = <2>;
+
+				port {
+					cam_endpoint: endpoint {
+						bus-type = <4>;
+						clock-lanes = <0>;
+						data-lanes = <1 2>;
+						link-frequencies =
+							/bits/ 64 <202500000>;
+						remote-endpoint = <&csi_ep>;
+					};
+				};
+			};
+		};
+	};
+
+	fragment@4 {
+		target = <&csi0>;
+		__overlay__ {
+			status = "okay";
+
+			port {
+				csi_ep: endpoint {
+					bus-type = <4>;
+					remote-endpoint = <&cam_endpoint>;
+					clock-lanes = <0>;
+					data-lanes = <1 2>;
+				};
+			};
+		};
+	};
+
+	fragment@5 {
+		target = <&cam0_reg>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+};

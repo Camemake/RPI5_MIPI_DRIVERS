@@ -8,7 +8,7 @@ The link number below is the V4L2 link frequency programmed into the receiver. T
 
 Packed RAW10 fourcc letters are case-sensitive. `pgAA` is GRBG. `pGAA` is GBRG, and the receiver rejects it. Mono RAW10 is `Y10P`.
 
-The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at the module crystal rate, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`. The OV5640 overlay does not use `cam0_reg`: that GPIO is the sensor's power-down pin and has to stay low. The AR1335 and SC835HAI overlays do not use `cam0_reg` either: that GPIO is the reset and has to stay high. Do not drive GPIO 35 on those two modules. The crystal is the clock.
+The boot file needs `camera_auto_detect=0` and exactly one of these overlays. The overlay enables `i2c0if`, `i2c0mux`, and `cam0_clk` at the module crystal rate, puts the sensor on `i2c_csi_dsi0`, and connects it to `csi0`. Supplies are `avdd` from `cam0_reg`, and `dovdd` and `dvdd` from `cam_dummy_reg`. The clock name is `xclk`. The OV5640 overlay does not use `cam0_reg`: that GPIO is the sensor's power-down pin and has to stay low. The AR1335, SC835HAI, and SC132GS overlays do not use `cam0_reg` either: that GPIO is the reset and has to stay high. Do not drive GPIO 35 on those modules. The crystal is the clock.
 
 Register address is 16 bits. The value is 8 bits, except on the AR0234CS and the AR1335, where the value is 16 bits.
 
@@ -29,6 +29,7 @@ The sensor page is the maker's own description of the chip. The row below is the
 | OmniVision OV5640 | Contact Camemake | 640×480 UYVY | 2 | 192 MHz |
 | onsemi AR1335 | [AR1335](https://www.onsemi.com/products/sensors/image-sensors/ar1335) | 4208×3120 RAW10 GRBG | 4 | 276 MHz |
 | SmartSens SC835HAI | [SC835HAI](https://www.smartsenstech.com/en/ai_products) | 3840×2160 RAW10 BGGR | 2 | 396 MHz |
+| SmartSens SC132GS | [SC132GS](https://www.smartsenstech.com/en/gs_products) | 1080×1280 RAW10 BGGR | 2 | 202.5 MHz |
 
 ## SC450AI
 
@@ -203,3 +204,18 @@ Sensor: [SmartSens SC835HAI](https://www.smartsenstech.com/en/ai_products). Cont
 - Soft reset is `0x0103=0x01`, then 10 ms. Stream on is `0x0100=0x01` after the table and another 10 ms. Standby is `0x0100=0x00`
 - Line length `0x320c/0x320d` is 4200. Frame length `0x320e/0x320f` is 2250
 - The browser preview is half of 3840×2160, about 3 pictures a second
+
+## SC132GS
+
+Sensor: [SmartSens SC132GS](https://www.smartsenstech.com/en/gs_products)
+
+Shop: [CM_MIPI_SC132GS_RPI](https://www.camemake.eu/shop/cm-mipi-sc132gs-rpi-sc132gs-1mp-ff-for-raspberry-pi-1101)
+
+- Compatible `smartsens,sc132gs`, I2C `0x30`, chip id at `0x3107` is `0x0132`
+- 1080×1280, RAW10, BGGR, fourcc `pBAA`
+- The receiver pads each line from 1350 bytes to 1360. `sizeimage` is 1740800
+- 2 lanes. The table writes `0x3018=0x32`, `0x301f=0x51`, and `0x3031=0x0a`. Link 202.5 MHz, log line `405 Mbps`
+- The table was written for a 24 MHz clock and 360 Mbps. The crystal on the module is 27 MHz, so the same ratios run at 405 Mbps. Do not drive GPIO 35
+- GPIO 34 is PWDN, active low. The chip answers only while the pin is high. `cam0_reg` is that same GPIO, so the overlay disables it
+- Soft reset is `0x0103=0x01`, then 10 ms. Stream on is `0x0100=0x01` after the table and another 10 ms. Standby is `0x0100=0x00`. Exposure `0x3e01=0x4e` and `0x3e02=0xc0` is 1260 lines. Frame length is 1400
+- The browser preview is half of 1080×1280, about 17 pictures a second
