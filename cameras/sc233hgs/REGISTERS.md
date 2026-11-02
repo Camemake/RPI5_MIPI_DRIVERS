@@ -60,9 +60,17 @@ Big-endian frame length in lines. The table writes `0x0640` (1600) and later `0x
 
 The table does not write this register. Leave bit 0 clear. This cable has no frame-sync wire, and setting that bit waits for a pulse the board does not send. Frames come from the `0x2100` edge instead.
 
-### `0x3221` mirror and flip
+### `0x3221` mirror, flip, and HDR enable
 
-The table does not write this register, and this driver has not changed it. On the SC2336 the same address is the mirror and flip control: mirror is bits 2:1 (`0x06`), flip is bits 6:5 (`0x60`). Read the byte, set those bits, and write it back. Confirm the picture after changing it on this part.
+The table does not write this register. Read it, change the bits below, and write the whole byte back.
+
+| Bits | Mask | Function |
+| --- | --- | --- |
+| 7 | `0x80` | Knee-point HDR. 1 enables it. The streamed mode leaves this clear |
+| 6:5 | `0x60` | Vertical flip |
+| 2:1 | `0x06` | Horizontal mirror |
+
+Bit 7 is the HDR switch on the global-shutter parts. Bits 6:5 and 2:1 are the flip and mirror used by the SC132GS and SC2336 drivers. This driver has not written the register, so the picture that streamed is linear.
 
 ### Exposure, `0x3e00` / `0x3e01` / `0x3e02`
 
@@ -83,13 +91,38 @@ The driver writes it as:
 
 `0x3e02` keeps the fraction in bits 7:4. The table's `0x40` in `0x3e01`, with the other two bytes 0, is 64 lines. The driver then writes `0x3e01=0xc0` and `0x3e02=0x00`, which is 192 lines. `0x3e00` stays 0 until the line count needs bits above `0x3e01`.
 
-`0x3e03=0x0b` is written by the table and the driver does not change it.
+### Knee-point HDR
 
-### Gain, `0x3e08` / `0x3e09`
+HDR on this sensor is one frame with two slopes. The bright part of the scene is compressed after a knee, and the dark part stays on the steeper slope. There is no second exposure on another MIPI virtual channel. The stagger addresses used by the rolling-shutter SmartSens parts, `0x3e04`, `0x3e05`, `0x3e22`, `0x3e10`, `0x3e11`, `0x3e12`, and `0x3e13`, are not this HDR path.
 
-`0x3e08` is coarse analog gain. `0x3e09` is fine analog gain. The table sets coarse `0x00` and fine `0x40`. The driver leaves coarse alone and writes fine `0x80`.
+The knee has to stay shorter than the total exposure. The exposure that produced a picture is 192 lines, and the frame length is 3200 lines.
 
-`0x3e06` and `0x3e07` are the digital coarse and fine gain on this family. This driver does not write them. The short-exposure copies at `0x3e04`, `0x3e05`, `0x3e10`–`0x3e13`, and `0x3e22` are also untouched. This mode is one exposure.
+| Register | This mode | Role |
+| --- | --- | --- |
+| `0x3221[7]` | not written, bit clear | HDR enable. Set the bit to turn the knee on |
+| `0x3e00` / `0x3e01` / `0x3e02` | 192 lines after the table | Total exposure, both slopes. Same packing as the linear exposure |
+| `0x3385` | `0x59` (89) | First knee byte in this table |
+| `0x3387` | `0x79` (121) | Second knee byte in this table |
+| `0x3e03` | `0x0b` | Manual exposure and manual gain, and the gain map those bytes use |
+| `0x3e08` | `0x00` | Coarse analog gain. The driver leaves the table value |
+| `0x3e09` | `0x80` after the table | Fine analog gain. The table value is `0x40` |
+| `0x3e06` | not written | Coarse digital gain |
+| `0x3e07` | not written | Fine digital gain |
+| `0x33fa` | `0x02` | Analog setting that follows the gain |
+| `0x3317` | `0x30` | Analog setting that follows the gain |
+| `0x3234` | not written | External knee trigger. This cable has no Trigger1 pin, so leave it |
+
+`0x3386` is not in this list. The older SC130GS describes the knee as the 16-bit pair `0x3385`/`0x3386`, counted in units of two lines. This init list writes `0x3385` and `0x3387` and skips `0x3386`, which is the same pair the SC132GS and SC035GS lists write. Keep those two bytes, and count them in the same line units as `{0x3e01, 0x3e02[7:4]}`. On this module that field is one line per count: `0x3e01=0x40` with the other exposure bytes 0 is 64 lines.
+
+`0x3e03=0x0b` leaves bits [1:0] set. Bit 0 is manual exposure and bit 1 is manual gain, so the exposure and gain registers are the ones that apply. The rest of the byte stays `0x0b`. Writing `0x03` selects the other gain map.
+
+Fine analog `0x40` is the 1× code in the map this byte selects. The driver replaces it with `0x80`. Coarse analog stays `0x00`. Digital gain is the pair this driver does not write. On the SC132GS, 1× digital gain is `0x3e06=0x00` and `0x3e07=0x80`, and the coarse analog code for the first gain step is `0x03` rather than `0x00`. This table's coarse byte is `0x00`, so that sibling's coarse ladder is not what is loaded here. Check the picture before copying those coarse codes across.
+
+`0x33fa` and `0x3317` move with gain on the SC132GS: below 2× they are `0x01` and `0xf0`, and at 2× and above they are `0x02` and `0x0a`. This table's `0x3317` is `0x30`, so the second of those constants is not the value loaded here. If fine gain moves a long way from `0x80`, write this pair again and look at the frame.
+
+`0x3234[7]` would enable an external trigger and `0x3234[0]` would take the knee from a Trigger1 pin. This connector does not wire that pin. The knee stays in `0x3385` and `0x3387`, and frames still come from the `0x2100` edge.
+
+The bytes `0x3385` and `0x3387` are already in the mode table. HDR stays off until `0x3221[7]` is set.
 
 ### PLL hold, `0x36e9` and `0x37f9`
 
@@ -131,7 +164,7 @@ After the last row the driver waits 8 ms, writes the exposure and gain below, th
 - `0x330d` = `0x30`
 - `0x3314` = `0xc0`
 - `0x3315` = `0x30`
-- `0x3317` = `0x30`
+- `0x3317` = `0x30` — gain-dependent analog, table value
 - `0x3318` = `0x1f`
 - `0x331d` = `0x32`
 - `0x331f` = `0x02`
@@ -140,12 +173,12 @@ After the last row the driver waits 8 ms, writes the exposure and gain below, th
 - `0x3352` = `0x1a`
 - `0x3356` = `0x1c`
 - `0x3363` = `0x0f`
-- `0x3385` = `0x59`
-- `0x3387` = `0x79`
+- `0x3385` = `0x59` — first knee byte, 89
+- `0x3387` = `0x79` — second knee byte, 121
 - `0x33b0` = `0x00`
 - `0x33ef` = `0x04`
 - `0x33f8` = `0x02`
-- `0x33fa` = `0x02`
+- `0x33fa` = `0x02` — gain-dependent analog, table value
 - `0x341c` = `0x06`
 - `0x341e` = `0x24`
 - `0x341f` = `0x27`
@@ -234,7 +267,7 @@ After the last row the driver waits 8 ms, writes the exposure and gain below, th
 - `0x3e00` = `0x00` — exposure bits 15:12, table value, 64 lines together with the next two
 - `0x3e01` = `0x40` — exposure bits 11:4
 - `0x3e02` = `0x00` — exposure fraction in bits 7:4
-- `0x3e03` = `0x0b`
+- `0x3e03` = `0x0b` — manual exposure, manual gain, gain map for the knee mode
 - `0x3e08` = `0x00` — coarse analog gain
 - `0x3e09` = `0x40` — fine analog gain, table value
 - `0x3e15` = `0x00`
