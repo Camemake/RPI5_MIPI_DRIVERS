@@ -26,4 +26,4 @@ I2C 0x30, chip id 0xcb61, 1920×1200, 4 lanes, BGGR, link 270 MHz.
 
 The rest of the numbers, including the chip id and the link frequency, are in [DETAILS.md](../../DETAILS.md).
 
-Every register this driver writes, and every register it names, is in [REGISTERS.md](REGISTERS.md).
+Every register this driver writes is in [REGISTERS.md](REGISTERS.md), with the exposure, gain, frame length, and frame-edge fields spelled out so the mode table can be tuned without a datasheet.
